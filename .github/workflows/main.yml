@@ -2,22 +2,71 @@ name: COBOL Check Automation
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   cobol-check:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
 
-      - name: Set up Java
-        uses: actions/setup-java@v2
+    steps:
+      # -------------------------------
+      # 1. Checkout GitHub Repository
+      # -------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # -------------------------------
+      # 2. Setup Java (FIXED ERROR HERE)
+      # -------------------------------
+      - name: Set up Java 11
+        uses: actions/setup-java@v3
         with:
+          distribution: 'temurin'
           java-version: '11'
 
-      - name: Run COBOL Check
+      # -------------------------------
+      # 3. Verify Java Installation
+      # -------------------------------
+      - name: Verify Java
+        run: java -version
+
+      # -------------------------------
+      # 4. Install Zowe CLI
+      # -------------------------------
+      - name: Install Zowe CLI
+        run: |
+          npm install -g @zowe/cli
+          zowe --version
+
+      # -------------------------------
+      # 5. Setup Zowe Profile
+      # -------------------------------
+      - name: Configure Zowe Profile
         env:
           ZOWE_USERNAME: ${{ secrets.ZOWE_USERNAME }}
           ZOWE_PASSWORD: ${{ secrets.ZOWE_PASSWORD }}
         run: |
-          echo "Running COBOL Check"
+          zowe profiles create zosmf-profile zosmf \
+            --host YOUR_ZOSMF_HOST \
+            --port YOUR_ZOSMF_PORT \
+            --user $ZOWE_USERNAME \
+            --password $ZOWE_PASSWORD \
+            --reject-unauthorized false
+
+      # -------------------------------
+      # 6. Run Zowe Operations Script
+      # -------------------------------
+      - name: Upload COBOL Check to Mainframe
+        env:
+          ZOWE_USERNAME: ${{ secrets.ZOWE_USERNAME }}
+          ZOWE_PASSWORD: ${{ secrets.ZOWE_PASSWORD }}
+        run: |
+          chmod +x .github/scripts/zowe_operations.sh
+          .github/scripts/zowe_operations.sh
+
+      # -------------------------------
+      # 7. Finish
+      # -------------------------------
+      - name: Workflow completed
+        run: echo "COBOL Check GitHub Actions pipeline completed successfully"
