@@ -34,8 +34,8 @@ jobs:
       # 5. Upload COBOL Check to Mainframe (NO PROFILE)
       - name: Upload COBOL Check to Mainframe
         env:
-          ZOWE_HOST: YOUR_ZOSMF_HOST
-          ZOWE_PORT: YOUR_ZOSMF_PORT
+          ZOWE_HOST: 204.90.115.200
+          ZOWE_PORT: 10443
           ZOWE_USER: ${{ secrets.ZOWE_USERNAME }}
           ZOWE_PASSWORD: ${{ secrets.ZOWE_PASSWORD }}
           ZOWE_REJECT_UNAUTHORIZED: "true"
